@@ -35,7 +35,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _future = Supabase.instance.client.from('Prompts').select();
+  final _future = Supabase.instance.client.from('prompt').select();
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +53,7 @@ class _HomePageState extends State<HomePage> {
               final prompt = prompts[index];
               return ListTile(
                 title: Text(prompt['answer']),
+                subtitle: Text(prompt['draw_prompt']),
               );
             }),
           );

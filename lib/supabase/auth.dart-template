@@ -1,0 +1,4 @@
+
+// Rename to auth.dart and replace with real values
+const String supabaseUrl = 'SUPABASE-URL-HERE';
+const String supabaseAnonKey = 'SUPABASE-ANON-KEY-HERE';

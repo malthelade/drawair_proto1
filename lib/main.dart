@@ -1,7 +1,10 @@
+import 'dart:ffi';
 import 'dart:ui';
+import 'dart:math';
 
 import 'package:drawair_proto1/supabase/auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -37,6 +40,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final _future = Supabase.instance.client.from('prompt').select();
 
+  final answerController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,15 +52,28 @@ class _HomePageState extends State<HomePage> {
             return const Center(child: CircularProgressIndicator());
           }
           final prompts = snapshot.data!;
-          return ListView.builder(
-            itemCount: prompts.length,
-            itemBuilder: ((context, index) {
-              final prompt = prompts[index];
-              return ListTile(
-                title: Text(prompt['answer']),
-                subtitle: Text(prompt['draw_prompt']),
-              );
-            }),
+          prompts.shuffle();
+          final prompt = prompts.removeLast();
+          return Padding(
+            padding: const EdgeInsets.all(100.0),
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  TextField(
+                    controller: answerController,
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (answerController.text.toLowerCase() ==
+                          prompt['answer'].toLowerCase()) {
+                        print('rigtigt');
+                      }
+                    },
+                    child: Text('next'),
+                  ),
+                ],
+              ),
+            ),
           );
         },
       ),

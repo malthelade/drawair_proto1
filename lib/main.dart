@@ -59,6 +59,7 @@ class _HomePageState extends State<HomePage> {
             child: Center(
               child: Column(
                 children: <Widget>[
+                  Text(prompt['answer']),
                   TextField(
                     controller: answerController,
                   ),
@@ -67,9 +68,20 @@ class _HomePageState extends State<HomePage> {
                       if (answerController.text.toLowerCase() ==
                           prompt['answer'].toLowerCase()) {
                         print('rigtigt');
+                        showDialog(
+                            context: context,
+                            builder: (context) => const AlertDialog(
+                                title: Text('Rigtigt'),
+                                content: Text('Du svarede rigtigt')));
+                      } else {
+                        showDialog(
+                            context: context,
+                            builder: (context) => const AlertDialog(
+                                title: Text('Forkert'),
+                                content: Text('Du svarede forkert')));
                       }
                     },
-                    child: Text('next'),
+                    child: Text('Svar'),
                   ),
                 ],
               ),

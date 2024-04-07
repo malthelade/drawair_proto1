@@ -24,20 +24,20 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'Countries',
-      home: HomePage(),
+      title: 'DrawAir',
+      home: MainMenu(),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class GuessPage extends StatefulWidget {
+  const GuessPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<GuessPage> createState() => _GuessPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _GuessPageState extends State<GuessPage> {
   final _future = Supabase.instance.client.from('prompt').select();
 
   final answerController = TextEditingController();
@@ -81,8 +81,13 @@ class _HomePageState extends State<HomePage> {
                                 content: Text('Du svarede forkert')));
                       }
                     },
-                    child: Text('Svar'),
+                    child: const Text('Svar'),
                   ),
+                  ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Gå tilbage')),
                 ],
               ),
             ),
@@ -90,5 +95,31 @@ class _HomePageState extends State<HomePage> {
         },
       ),
     );
+  }
+}
+
+class MainMenu extends StatefulWidget {
+  const MainMenu({super.key});
+
+  @override
+  State<MainMenu> createState() => _MainMenuState();
+}
+
+class _MainMenuState extends State<MainMenu> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text('DrawAir'),
+        ),
+        body: Center(
+          child: ElevatedButton(
+            child: const Text('Gæt'),
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const GuessPage()));
+            },
+          ),
+        ));
   }
 }

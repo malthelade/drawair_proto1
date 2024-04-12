@@ -1,12 +1,13 @@
 import 'dart:ffi';
 import 'dart:ui';
-import 'dart:math';
 
 import 'package:drawair_proto1/supabase/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+final supabase = Supabase.instance.client;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +39,9 @@ class GuessPage extends StatefulWidget {
 }
 
 class _GuessPageState extends State<GuessPage> {
-  final _future = Supabase.instance.client.from('prompt').select();
+  final _future = Supabase.instance.client
+      .from('prompt')
+      .select('answer, chosen_prompt!inner(*)');
 
   final answerController = TextEditingController();
 
@@ -52,22 +55,20 @@ class _GuessPageState extends State<GuessPage> {
             return const Center(child: CircularProgressIndicator());
           }
           final prompts = snapshot.data!;
-          prompts.shuffle();
-          final prompt = prompts.removeLast();
+          var answer = prompts[0]['answer'];
           return Padding(
             padding: const EdgeInsets.all(100.0),
             child: Center(
               child: Column(
                 children: <Widget>[
-                  Text(prompt['answer']),
+                  Text(answer),
                   TextField(
                     controller: answerController,
                   ),
                   ElevatedButton(
                     onPressed: () {
                       if (answerController.text.toLowerCase() ==
-                          prompt['answer'].toLowerCase()) {
-                        print('rigtigt');
+                          answer.toLowerCase()) {
                         showDialog(
                             context: context,
                             builder: (context) => const AlertDialog(
@@ -113,13 +114,78 @@ class _MainMenuState extends State<MainMenu> {
           title: const Text('DrawAir'),
         ),
         body: Center(
-          child: ElevatedButton(
-            child: const Text('Gæt'),
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const GuessPage()));
-            },
+          child: Column(
+            children: <Widget>[
+              ElevatedButton(
+                child: const Text('Gæt'),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const GuessPage()));
+                },
+              ),
+              ElevatedButton(
+                child: const Text('Tegn'),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const DrawPage()));
+                },
+              ),
+            ],
           ),
         ));
+  }
+}
+
+class DrawPage extends StatefulWidget {
+  const DrawPage({super.key});
+
+  @override
+  State<DrawPage> createState() => _DrawPageState();
+}
+
+class _DrawPageState extends State<DrawPage> {
+  final _future = supabase.from('prompt').select();
+
+  pushPrompt(promptId) async {
+    await supabase
+        .from('chosen_prompt')
+        .update({'prompt_id': promptId}).match({'id': '1'});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _future,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final prompts = snapshot.data!;
+          prompts.shuffle();
+          final prompt = prompts.removeLast();
+          pushPrompt(prompt['id']);
+          return Padding(
+            padding: const EdgeInsets.all(100.0),
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  Text(prompt['draw_prompt']),
+                  ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Gå tilbage')),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 }

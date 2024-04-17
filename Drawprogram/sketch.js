@@ -1,0 +1,123 @@
+let video;
+let poseNet;
+let pose;
+let drawings = []
+let currentdrawings = []
+const estimationWindowWidth = 5
+let x_estimation = []
+let y_estimation = []
+let current_point;
+
+function setup() {
+  createCanvas(600, 400)
+  video = createCapture(VIDEO);
+  video.hide();
+  poseNet = ml5.poseNet(video, modelLoaded);
+  poseNet.on('pose', gotposes);
+
+
+}
+
+function modelLoaded() {
+  console.log('Model Ready');
+}
+// if the pose array has more indexes than 0 it will set the pose variabel to the first index in the poses array
+function gotposes(poses) {
+  if (poses.length > 0) {
+    pose = poses[0].pose;
+  }
+
+  current_point = pose.rightWrist;
+
+  if (mouseIsPressed == true) {
+    if (current_point) {
+
+      // Estimate next point
+      const pVec = estimatePoint(current_point)
+      // add point to drawing
+      currentdrawings.push(pVec);
+    }
+  }
+}
+
+
+function estimatePoint(current_point) {
+  
+  x_estimation.push(current_point['x']);
+  if (x_estimation.length > estimationWindowWidth) {
+    x_estimation.shift()
+  }
+  
+  y_estimation.push(current_point['y']);
+  if (y_estimation.length > estimationWindowWidth) {
+    y_estimation.shift()
+  }
+
+  //x average
+  let x_sum = 0;
+  for (let i = 0; i < x_estimation.length; i++) {
+    x_sum += x_estimation[i];
+  }
+  const x_avg = x_sum / x_estimation.length;
+  
+  //y average
+  let y_sum = 0;
+  for (let i = 0; i < y_estimation.length; i++) {
+    y_sum += y_estimation[i];
+  }
+  const y_avg = y_sum / y_estimation.length;
+
+  return createVector(x_avg, y_avg)
+}
+
+//runs 60 times a second and is used to draw what is seen on the screen.
+function draw() {
+
+  translate(width,0);
+  scale(-1,1);
+  image(video, 0, 0);
+  render_drawing();
+  render_currentdrawing();
+}
+
+
+function keyPressed() {
+  if (key == ' ');
+  drawings = [];
+  console.log('spacebar pressed')
+}
+
+function mouseReleased() {
+  clone = currentdrawings.slice();
+  drawings.push(clone);
+  currentdrawings = [];
+  x_estimation = [];
+  y_estimation = [];
+}
+
+
+function render_drawing() {
+  for (const drawing of drawings) {
+    noFill();
+    beginShape();
+    stroke('pink');
+    strokeWeight(10);
+    for (const p of drawing) {
+      vertex(p.x, p.y);
+    };
+    const lastpoint = drawing[drawing.length - 1];
+    vertex(lastpoint.x, lastpoint.y);
+    endShape();
+  }
+}
+
+function render_currentdrawing() {
+  beginShape();
+  noFill();
+  stroke('pink');
+  strokeWeight(10);
+  for (const p of currentdrawings) {
+    vertex(p.x, p.y);
+  };
+  endShape();
+}

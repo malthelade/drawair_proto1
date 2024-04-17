@@ -1,9 +1,13 @@
+import 'dart:ffi';
 import 'dart:ui';
 
 import 'package:drawair_proto1/supabase/auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+final supabase = Supabase.instance.client;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,21 +25,25 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'Countries',
-      home: HomePage(),
+      title: 'DrawAir',
+      home: MainMenu(),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class GuessPage extends StatefulWidget {
+  const GuessPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<GuessPage> createState() => _GuessPageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  final _future = Supabase.instance.client.from('prompt').select();
+class _GuessPageState extends State<GuessPage> {
+  final _future = Supabase.instance.client
+      .from('prompt')
+      .select('answer, chosen_prompt!inner(*)');
+
+  final answerController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -47,15 +55,134 @@ class _HomePageState extends State<HomePage> {
             return const Center(child: CircularProgressIndicator());
           }
           final prompts = snapshot.data!;
-          return ListView.builder(
-            itemCount: prompts.length,
-            itemBuilder: ((context, index) {
-              final prompt = prompts[index];
-              return ListTile(
-                title: Text(prompt['answer']),
-                subtitle: Text(prompt['draw_prompt']),
-              );
-            }),
+          var answer = prompts[0]['answer'];
+          return Padding(
+            padding: const EdgeInsets.all(100.0),
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  Text(answer),
+                  TextField(
+                    controller: answerController,
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (answerController.text.toLowerCase() ==
+                          answer.toLowerCase()) {
+                        showDialog(
+                            context: context,
+                            builder: (context) => const AlertDialog(
+                                title: Text('Rigtigt'),
+                                content: Text('Du svarede rigtigt')));
+                      } else {
+                        showDialog(
+                            context: context,
+                            builder: (context) => const AlertDialog(
+                                title: Text('Forkert'),
+                                content: Text('Du svarede forkert')));
+                      }
+                    },
+                    child: const Text('Svar'),
+                  ),
+                  ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Gå tilbage')),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class MainMenu extends StatefulWidget {
+  const MainMenu({super.key});
+
+  @override
+  State<MainMenu> createState() => _MainMenuState();
+}
+
+class _MainMenuState extends State<MainMenu> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text('DrawAir'),
+        ),
+        body: Center(
+          child: Column(
+            children: <Widget>[
+              ElevatedButton(
+                child: const Text('Gæt'),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const GuessPage()));
+                },
+              ),
+              ElevatedButton(
+                child: const Text('Tegn'),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const DrawPage()));
+                },
+              ),
+            ],
+          ),
+        ));
+  }
+}
+
+class DrawPage extends StatefulWidget {
+  const DrawPage({super.key});
+
+  @override
+  State<DrawPage> createState() => _DrawPageState();
+}
+
+class _DrawPageState extends State<DrawPage> {
+  final _future = supabase.from('prompt').select();
+
+  pushPrompt(promptId) async {
+    await supabase
+        .from('chosen_prompt')
+        .update({'prompt_id': promptId}).match({'id': '1'});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _future,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final prompts = snapshot.data!;
+          prompts.shuffle();
+          final prompt = prompts.removeLast();
+          pushPrompt(prompt['id']);
+          return Padding(
+            padding: const EdgeInsets.all(100.0),
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  Text(prompt['draw_prompt']),
+                  ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Gå tilbage')),
+                ],
+              ),
+            ),
           );
         },
       ),

@@ -1,10 +1,9 @@
 let video;
-let flippedVideo;
 let poseNet;
 let pose;
 let drawings = []
 let currentdrawings = []
-const estimationWindowWidth = 5
+const estimationWindowWidth = 6
 let x_estimation = []
 let y_estimation = []
 let current_point;
@@ -14,7 +13,6 @@ function setup() {
   video = createCapture(VIDEO);
   video.size(900, 600);
   video.hide();
-  flippedVideo = ml5.flipImage(video);
   poseNet = ml5.poseNet(video, modelLoaded);
   poseNet.on('pose', gotposes);
 }
@@ -26,6 +24,10 @@ function modelLoaded() {
 function gotposes(poses) {
   if (poses.length > 0) {
     pose = poses[0].pose;
+  }
+  if (!pose){
+    console.log('pose empty')
+    return
   }
 
   current_point = pose.rightWrist;
@@ -73,8 +75,8 @@ function estimatePoint(current_point) {
 //runs 60 times a second and is used to draw what is seen on the screen.
 function draw() {
   background(0);
-  translate(width, 0);
-  scale(-1, 1);
+  //translate(width, 0);
+  //scale(-1, 1);
   image(video, 0, 0);
   render_drawing();
   render_currentdrawing();

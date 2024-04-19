@@ -1,4 +1,5 @@
 let video;
+let flippedVideo;
 let poseNet;
 let pose;
 let drawings = []
@@ -9,9 +10,11 @@ let y_estimation = []
 let current_point;
 
 function setup() {
-  createCanvas(600, 400)
+  createCanvas(900, 600)
   video = createCapture(VIDEO);
+  video.size(900, 600);
   video.hide();
+  flippedVideo = ml5.flipImage(video);
   poseNet = ml5.poseNet(video, modelLoaded);
   poseNet.on('pose', gotposes);
 
@@ -29,7 +32,7 @@ function gotposes(poses) {
 
   current_point = pose.rightWrist;
 
-  if (mouseIsPressed == true) {
+  if (mouseIsPressed == true && mouseButton === LEFT) {
     if (current_point) {
 
       // Estimate next point
@@ -42,12 +45,12 @@ function gotposes(poses) {
 
 
 function estimatePoint(current_point) {
-  
+
   x_estimation.push(current_point['x']);
   if (x_estimation.length > estimationWindowWidth) {
     x_estimation.shift()
   }
-  
+
   y_estimation.push(current_point['y']);
   if (y_estimation.length > estimationWindowWidth) {
     y_estimation.shift()
@@ -55,15 +58,15 @@ function estimatePoint(current_point) {
 
   //x average
   let x_sum = 0;
-  for (let i = 0; i < x_estimation.length; i++) {
-    x_sum += x_estimation[i];
+  for (const xVal of x_estimation) {
+    x_sum += xVal;
   }
   const x_avg = x_sum / x_estimation.length;
-  
+
   //y average
   let y_sum = 0;
-  for (let i = 0; i < y_estimation.length; i++) {
-    y_sum += y_estimation[i];
+  for (const yVal of y_estimation) {
+    y_sum += yVal;
   }
   const y_avg = y_sum / y_estimation.length;
 
@@ -72,29 +75,31 @@ function estimatePoint(current_point) {
 
 //runs 60 times a second and is used to draw what is seen on the screen.
 function draw() {
-
-  translate(width,0);
-  scale(-1,1);
+  background(0);
+  translate(width, 0);
+  scale(-1, 1);
   image(video, 0, 0);
   render_drawing();
   render_currentdrawing();
 }
 
+function mousePressed() {
+  if (mouseButton === RIGHT) {
+    clearDrawings();
+  }
 
-function keyPressed() {
-  if (key == ' ');
-  drawings = [];
-  console.log('spacebar pressed')
+  if (mouseButton === LEFT) {
+    clearEstimaton();
+  }
 }
 
 function mouseReleased() {
-  clone = currentdrawings.slice();
-  drawings.push(clone);
-  currentdrawings = [];
-  x_estimation = [];
-  y_estimation = [];
+  if (mouseButton === LEFT) {
+    clone = currentdrawings.slice();
+    drawings.push(clone);
+    currentdrawings = [];
+  }
 }
-
 
 function render_drawing() {
   for (const drawing of drawings) {
@@ -120,4 +125,14 @@ function render_currentdrawing() {
     vertex(p.x, p.y);
   };
   endShape();
+}
+
+function clearEstimaton() {
+  x_estimation = [];
+  y_estimation = [];
+}
+
+function clearDrawings() {
+  drawings = [];
+  console.log('cleared');
 }

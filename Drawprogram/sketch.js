@@ -92,8 +92,10 @@ function mousePressed() {
 
 function mouseReleased() {
   if (mouseButton === LEFT) {
-    clone = currentdrawings.slice();
-    drawings.push(clone);
+    if (currentdrawings.length > 0) {
+      clone = currentdrawings.slice();
+      drawings.push(clone);
+    } 
     currentdrawings = [];
   }
 }
@@ -112,6 +114,7 @@ function render_drawing() {
     endShape();
   }
 }
+
 
 function render_currentdrawing() {
   beginShape();

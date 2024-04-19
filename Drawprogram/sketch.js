@@ -17,8 +17,6 @@ function setup() {
   flippedVideo = ml5.flipImage(video);
   poseNet = ml5.poseNet(video, modelLoaded);
   poseNet.on('pose', gotposes);
-
-
 }
 
 function modelLoaded() {
@@ -42,7 +40,6 @@ function gotposes(poses) {
     }
   }
 }
-
 
 function estimatePoint(current_point) {
 

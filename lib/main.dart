@@ -107,6 +107,12 @@ class MainMenu extends StatefulWidget {
 }
 
 class _MainMenuState extends State<MainMenu> {
+  final nameController = TextEditingController();
+
+  createPlayer(newName) async {
+    await supabase.from('player').insert({'name': newName});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,22 +122,23 @@ class _MainMenuState extends State<MainMenu> {
         body: Center(
           child: Column(
             children: <Widget>[
+              Padding(
+                  padding: const EdgeInsets.all(50),
+                  child: TextField(
+                    controller: nameController,
+                    textAlign: TextAlign.center,
+                    decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'Enter player name'),
+                  )),
               ElevatedButton(
                 child: const Text('Gæt'),
                 onPressed: () {
+                  createPlayer(nameController.text);
                   Navigator.push(
                       context,
                       MaterialPageRoute(
                           builder: (context) => const GuessPage()));
-                },
-              ),
-              ElevatedButton(
-                child: const Text('Tegn'),
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const DrawPage()));
                 },
               ),
             ],

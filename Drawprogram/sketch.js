@@ -75,8 +75,6 @@ function estimatePoint(current_point) {
 //runs 60 times a second and is used to draw what is seen on the screen.
 function draw() {
   background(0);
-  //translate(width, 0);
-  //scale(-1, 1);
   image(video, 0, 0);
   render_drawing();
   render_currentdrawing();
@@ -123,6 +121,7 @@ function render_currentdrawing() {
   noFill();
   stroke('pink');
   strokeWeight(10);
+  
   for (const p of currentdrawings) {
     vertex(p.x, p.y);
   };

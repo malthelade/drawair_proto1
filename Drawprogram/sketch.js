@@ -77,7 +77,9 @@ function draw() {
   background(0);
   image(video, 0, 0);
   render_drawing();
-  render_currentdrawing();
+  if (currentdrawings.length > 0 ){
+    render_currentdrawing();
+  }
 }
 
 function mousePressed() {
@@ -104,10 +106,11 @@ function render_drawing() {
   for (const drawing of drawings) {
     noFill();
     beginShape();
-    stroke('pink');
-    strokeWeight(10);
+    stroke('red');
+    strokeWeight(5);
+    curveVertex(drawing[0].x, drawing[0].y)
     for (const p of drawing) {
-      vertex(p.x, p.y);
+      curveVertex(p.x, p.y);
     };
     const lastpoint = drawing[drawing.length - 1];
     vertex(lastpoint.x, lastpoint.y);
@@ -119,12 +122,14 @@ function render_drawing() {
 function render_currentdrawing() {
   beginShape();
   noFill();
-  stroke('pink');
-  strokeWeight(10);
-  
+  stroke('red');
+  strokeWeight(5);
+  curveVertex(currentdrawings[0].x, currentdrawings[0].y)
   for (const p of currentdrawings) {
-    vertex(p.x, p.y);
+    curveVertex(p.x, p.y);
   };
+  const lastpoint = currentdrawings[currentdrawings.length - 1];
+  curveVertex(lastpoint.x, lastpoint.y)
   endShape();
 }
 

@@ -3,13 +3,24 @@ let poseNet;
 let pose;
 let drawings = []
 let currentdrawings = []
-const estimationWindowWidth = 6
+let estimationWindowWidth = 5;
 let x_estimation = []
 let y_estimation = []
 let current_point;
+let smoothed_point;
+let tracking_point;
+let debug = false;
+let estimationSlider;
+
 
 function setup() {
-  createCanvas(900, 600)
+  current_point = createVector(0,0);
+  smoothed_point = createVector(0,0);
+  createCanvas(900, 630)
+  
+  estimationSlider = createSlider(1,15,estimationWindowWidth,1);
+  estimationSlider.position(50,600);
+  estimationSlider.size(255);
   video = createCapture(VIDEO);
   video.size(900, 600);
   video.hide();
@@ -30,13 +41,15 @@ function gotposes(poses) {
     return
   }
 
-  current_point = pose.rightWrist;
+  // current_point = pose.rightWrist;
+  current_point = pose.nose;
 
   if (mouseIsPressed == true && mouseButton === LEFT) {
     if (current_point) {
 
       // Estimate next point
       const pVec = estimatePoint(current_point)
+      smoothed_point = pVec; // DEBUG
       // add point to drawing
       currentdrawings.push(pVec);
     }
@@ -80,6 +93,16 @@ function draw() {
   if (currentdrawings.length > 0 ){
     render_currentdrawing();
   }
+
+  if (debug == true){
+    stroke('red')
+    circle(current_point.x, current_point.y, 8); // DEBUG
+    stroke('blue')
+    circle(smoothed_point.x, smoothed_point.y, 20); // DEBUG
+  }
+  estimationWindowWidth = estimationSlider.value();
+  text("sample size " + estimationWindowWidth,50,580);
+  
 }
 
 function mousePressed() {
@@ -102,18 +125,52 @@ function mouseReleased() {
   }
 }
 
+function keyPressed(){
+  if (key == "n"){
+    tracking_point = nose;
+  }
+  if (key == "m"){
+    tracking_point = rightWrist;
+  }
+  if (key == "b"){
+    tracking_point = leftWrist;
+  }
+  if (key == "d"){
+    if (debug == false){
+      debug = true
+    }
+    else {
+      (debug = false);
+    }
+  }
+}
+
+
 function render_drawing() {
   for (const drawing of drawings) {
     noFill();
     beginShape();
     stroke('red');
-    strokeWeight(5);
+    strokeWeight(3);
     curveVertex(drawing[0].x, drawing[0].y)
     for (const p of drawing) {
       curveVertex(p.x, p.y);
+      
     };
     const lastpoint = drawing[drawing.length - 1];
-    vertex(lastpoint.x, lastpoint.y);
+    curveVertex(lastpoint.x, lastpoint.y);
+    endShape();
+    
+    beginShape();
+    noFill();
+    stroke('blue');
+    strokeWeight(1);
+    
+    for (const p of drawing) {
+      vertex(p.x, p.y);
+      
+    };
+    
     endShape();
   }
 }
@@ -127,6 +184,7 @@ function render_currentdrawing() {
   curveVertex(currentdrawings[0].x, currentdrawings[0].y)
   for (const p of currentdrawings) {
     curveVertex(p.x, p.y);
+    
   };
   const lastpoint = currentdrawings[currentdrawings.length - 1];
   curveVertex(lastpoint.x, lastpoint.y)

@@ -1,5 +1,6 @@
 import 'dart:ffi';
 import 'dart:ui';
+import 'dart:math';
 
 import 'package:drawair_proto1/supabase/auth.dart';
 import 'package:flutter/material.dart';
@@ -108,9 +109,11 @@ class MainMenu extends StatefulWidget {
 
 class _MainMenuState extends State<MainMenu> {
   final nameController = TextEditingController();
+  late int playerID;
 
   createPlayer(newName) async {
-    await supabase.from('player').insert({'name': newName});
+    playerID = Random().nextInt(899999) + 100000;
+    await supabase.from('player').insert({'id': playerID, 'name': newName});
   }
 
   @override
@@ -132,13 +135,13 @@ class _MainMenuState extends State<MainMenu> {
                         hintText: 'Enter player name'),
                   )),
               ElevatedButton(
-                child: const Text('Gæt'),
+                child: const Text('Continue'),
                 onPressed: () {
                   createPlayer(nameController.text);
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const GuessPage()));
+                          builder: (context) => LobbyPage(id: playerID)));
                 },
               ),
             ],
@@ -192,6 +195,40 @@ class _DrawPageState extends State<DrawPage> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class LobbyPage extends StatefulWidget {
+  const LobbyPage({super.key, required this.id});
+
+  final int id;
+
+  @override
+  State<LobbyPage> createState() => _LobbyPageState();
+}
+
+class _LobbyPageState extends State<LobbyPage> {
+  createGame(playerID) async {}
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Column(
+        children: <Widget>[
+          Padding(
+              padding: EdgeInsets.only(
+                  top: 150.0, left: 100.0, right: 100.0, bottom: 50.0),
+              child: Center(
+                  child: ElevatedButton(
+                      onPressed: null, child: Text('Create game')))),
+          Padding(
+              padding: EdgeInsets.symmetric(horizontal: 50.0),
+              child: Center(
+                  child: ElevatedButton(
+                      onPressed: null, child: Text('Join game')))),
+        ],
       ),
     );
   }

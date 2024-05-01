@@ -14,18 +14,18 @@ let estimationSlider;
 
 
 function setup() {
-  current_point = createVector(0,0);
-  smoothed_point = createVector(0,0);
+  current_point = createVector(0, 0);
+  smoothed_point = createVector(0, 0);
   createCanvas(900, 630)
-  
-  estimationSlider = createSlider(1,15,estimationWindowWidth,1);
-  estimationSlider.position(50,600);
-  estimationSlider.size(255);
   video = createCapture(VIDEO);
   video.size(900, 600);
   video.hide();
   poseNet = ml5.poseNet(video, modelLoaded);
   poseNet.on('pose', gotposes);
+  estimationSlider = createSlider(1, 15, estimationWindowWidth, 1);
+  estimationSlider.position(50, 600);
+  estimationSlider.size(255);
+  estimationSlider.hide();
 }
 
 function modelLoaded() {
@@ -36,13 +36,12 @@ function gotposes(poses) {
   if (poses.length > 0) {
     pose = poses[0].pose;
   }
-  if (!pose){
+  if (!pose) {
     console.log('pose empty')
     return
   }
 
-  // current_point = pose.rightWrist;
-  current_point = pose.nose;
+  current_point = pose.rightWrist;
 
   if (mouseIsPressed == true && mouseButton === LEFT) {
     if (current_point) {
@@ -60,12 +59,12 @@ function estimatePoint(current_point) {
 
   x_estimation.push(current_point['x']);
   if (x_estimation.length > estimationWindowWidth) {
-    x_estimation.shift()
+    x_estimation.shift();
   }
 
   y_estimation.push(current_point['y']);
   if (y_estimation.length > estimationWindowWidth) {
-    y_estimation.shift()
+    y_estimation.shift();
   }
 
   //x average
@@ -90,21 +89,24 @@ function draw() {
   background(0);
   image(video, 0, 0);
   render_drawing();
-  if (currentdrawings.length > 0 ){
+  if (currentdrawings.length > 0) {
     render_currentdrawing();
   }
-
-  if (debug == true){
+  // debug mode code
+  if (debug == true) {
     stroke('red')
     circle(current_point.x, current_point.y, 8); // DEBUG
     stroke('blue')
     circle(smoothed_point.x, smoothed_point.y, 20); // DEBUG
+    estimationWindowWidth = estimationSlider.value();
+    estimationSlider.show();
+  } else {
+    estimationWindowWidth = 5
+    estimationSlider.hide();
   }
-  estimationWindowWidth = estimationSlider.value();
-  text("sample size " + estimationWindowWidth,50,580);
-  
 }
 
+// debug mode code
 function mousePressed() {
   if (mouseButton === RIGHT) {
     clearDrawings();
@@ -120,23 +122,14 @@ function mouseReleased() {
     if (currentdrawings.length > 0) {
       clone = currentdrawings.slice();
       drawings.push(clone);
-    } 
+    }
     currentdrawings = [];
   }
 }
-
-function keyPressed(){
-  if (key == "n"){
-    tracking_point = nose;
-  }
-  if (key == "m"){
-    tracking_point = rightWrist;
-  }
-  if (key == "b"){
-    tracking_point = leftWrist;
-  }
-  if (key == "d"){
-    if (debug == false){
+// activate debug mode
+function keyPressed() {
+  if (key == "d") {
+    if (debug == false) {
       debug = true
     }
     else {
@@ -144,6 +137,7 @@ function keyPressed(){
     }
   }
 }
+
 
 
 function render_drawing() {
@@ -155,26 +149,29 @@ function render_drawing() {
     curveVertex(drawing[0].x, drawing[0].y)
     for (const p of drawing) {
       curveVertex(p.x, p.y);
-      
+
     };
     const lastpoint = drawing[drawing.length - 1];
     curveVertex(lastpoint.x, lastpoint.y);
     endShape();
-    
-    beginShape();
-    noFill();
-    stroke('blue');
-    strokeWeight(1);
-    
-    for (const p of drawing) {
-      vertex(p.x, p.y);
-      
-    };
-    
-    endShape();
+
+    //debug mode code
+    if (debug == true) {
+      beginShape();
+      noFill();
+      stroke('blue');
+      strokeWeight(1);
+
+      for (const p of drawing) {
+        vertex(p.x, p.y);
+
+      };
+
+      endShape();
+      //debug mode code 
+    }
   }
 }
-
 
 function render_currentdrawing() {
   beginShape();
@@ -184,7 +181,6 @@ function render_currentdrawing() {
   curveVertex(currentdrawings[0].x, currentdrawings[0].y)
   for (const p of currentdrawings) {
     curveVertex(p.x, p.y);
-    
   };
   const lastpoint = currentdrawings[currentdrawings.length - 1];
   curveVertex(lastpoint.x, lastpoint.y)

@@ -3,18 +3,29 @@ let poseNet;
 let pose;
 let drawings = []
 let currentdrawings = []
-const estimationWindowWidth = 6
+let estimationWindowWidth = 5;
 let x_estimation = []
 let y_estimation = []
 let current_point;
+let smoothed_point;
+let tracking_point;
+let debug = false;
+let estimationSlider;
+
 
 function setup() {
-  createCanvas(900, 600)
+  current_point = createVector(0, 0);
+  smoothed_point = createVector(0, 0);
+  createCanvas(900, 630)
   video = createCapture(VIDEO);
   video.size(900, 600);
   video.hide();
   poseNet = ml5.poseNet(video, modelLoaded);
   poseNet.on('pose', gotposes);
+  estimationSlider = createSlider(1, 15, estimationWindowWidth, 1);
+  estimationSlider.position(50, 600);
+  estimationSlider.size(255);
+  estimationSlider.hide();
 }
 
 function modelLoaded() {
@@ -25,7 +36,7 @@ function gotposes(poses) {
   if (poses.length > 0) {
     pose = poses[0].pose;
   }
-  if (!pose){
+  if (!pose) {
     console.log('pose empty')
     return
   }
@@ -37,6 +48,7 @@ function gotposes(poses) {
 
       // Estimate next point
       const pVec = estimatePoint(current_point)
+      smoothed_point = pVec; // DEBUG
       // add point to drawing
       currentdrawings.push(pVec);
     }
@@ -47,12 +59,12 @@ function estimatePoint(current_point) {
 
   x_estimation.push(current_point['x']);
   if (x_estimation.length > estimationWindowWidth) {
-    x_estimation.shift()
+    x_estimation.shift();
   }
 
   y_estimation.push(current_point['y']);
   if (y_estimation.length > estimationWindowWidth) {
-    y_estimation.shift()
+    y_estimation.shift();
   }
 
   //x average
@@ -77,11 +89,24 @@ function draw() {
   background(0);
   image(video, 0, 0);
   render_drawing();
-  if (currentdrawings.length > 0 ){
+  if (currentdrawings.length > 0) {
     render_currentdrawing();
+  }
+  // debug mode code
+  if (debug == true) {
+    stroke('red')
+    circle(current_point.x, current_point.y, 8); // DEBUG
+    stroke('blue')
+    circle(smoothed_point.x, smoothed_point.y, 20); // DEBUG
+    estimationWindowWidth = estimationSlider.value();
+    estimationSlider.show();
+  } else {
+    estimationWindowWidth = 5
+    estimationSlider.hide();
   }
 }
 
+// debug mode code
 function mousePressed() {
   if (mouseButton === RIGHT) {
     clearDrawings();
@@ -97,27 +122,56 @@ function mouseReleased() {
     if (currentdrawings.length > 0) {
       clone = currentdrawings.slice();
       drawings.push(clone);
-    } 
+    }
     currentdrawings = [];
   }
 }
+// activate debug mode
+function keyPressed() {
+  if (key == "d") {
+    if (debug == false) {
+      debug = true
+    }
+    else {
+      (debug = false);
+    }
+  }
+}
+
+
 
 function render_drawing() {
   for (const drawing of drawings) {
     noFill();
     beginShape();
     stroke('red');
-    strokeWeight(5);
+    strokeWeight(3);
     curveVertex(drawing[0].x, drawing[0].y)
     for (const p of drawing) {
       curveVertex(p.x, p.y);
+
     };
     const lastpoint = drawing[drawing.length - 1];
-    vertex(lastpoint.x, lastpoint.y);
+    curveVertex(lastpoint.x, lastpoint.y);
     endShape();
+
+    //debug mode code
+    if (debug == true) {
+      beginShape();
+      noFill();
+      stroke('blue');
+      strokeWeight(1);
+
+      for (const p of drawing) {
+        vertex(p.x, p.y);
+
+      };
+
+      endShape();
+      //debug mode code 
+    }
   }
 }
-
 
 function render_currentdrawing() {
   beginShape();

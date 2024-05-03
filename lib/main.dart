@@ -201,29 +201,34 @@ class _DrawPageState extends State<DrawPage> {
 }
 
 class LobbyPage extends StatefulWidget {
-  const LobbyPage({super.key, required this.id});
-
   final int id;
+
+  const LobbyPage({super.key, required this.id});
 
   @override
   State<LobbyPage> createState() => _LobbyPageState();
 }
 
 class _LobbyPageState extends State<LobbyPage> {
-  createGame(playerID) async {}
+  createGame(playerID) async {
+    print(playerID);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Column(
         children: <Widget>[
           Padding(
-              padding: EdgeInsets.only(
+              padding: const EdgeInsets.only(
                   top: 150.0, left: 100.0, right: 100.0, bottom: 50.0),
               child: Center(
                   child: ElevatedButton(
-                      onPressed: null, child: Text('Create game')))),
-          Padding(
+                      onPressed: () {
+                        createGame(widget.id);
+                      },
+                      child: const Text('Create game')))),
+          const Padding(
               padding: EdgeInsets.symmetric(horizontal: 50.0),
               child: Center(
                   child: ElevatedButton(

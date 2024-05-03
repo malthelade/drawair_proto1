@@ -8,7 +8,6 @@ let x_estimation = []
 let y_estimation = []
 let current_point;
 let smoothed_point;
-let tracking_point;
 let debug = false;
 let estimationSlider;
 
@@ -104,14 +103,14 @@ function draw() {
     estimationWindowWidth = 5
     estimationSlider.hide();
   }
+  //debug mode code
 }
 
-// debug mode code
+
 function mousePressed() {
   if (mouseButton === RIGHT) {
     clearDrawings();
   }
-
   if (mouseButton === LEFT) {
     clearEstimaton();
   }
@@ -149,7 +148,6 @@ function render_drawing() {
     curveVertex(drawing[0].x, drawing[0].y)
     for (const p of drawing) {
       curveVertex(p.x, p.y);
-
     };
     const lastpoint = drawing[drawing.length - 1];
     curveVertex(lastpoint.x, lastpoint.y);
@@ -161,12 +159,9 @@ function render_drawing() {
       noFill();
       stroke('blue');
       strokeWeight(1);
-
       for (const p of drawing) {
         vertex(p.x, p.y);
-
       };
-
       endShape();
       //debug mode code 
     }

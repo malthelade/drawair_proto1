@@ -1,9 +1,8 @@
 import 'dart:math';
 
 import 'package:drawair_proto1/main.dart';
+import 'package:drawair_proto1/ui/scoreboard_page.dart';
 import 'package:flutter/material.dart';
-
-import 'draw_page.dart';
 
 class LobbyPage extends StatefulWidget {
   final int id;
@@ -15,8 +14,11 @@ class LobbyPage extends StatefulWidget {
 }
 
 class _LobbyPageState extends State<LobbyPage> {
+  late int roomID;
+
   createGame(playerID) async {
     final int roomCode = Random().nextInt(899999) + 100000;
+    roomID = roomCode;
     await supabase.from('room').insert({'id': roomCode});
     await supabase.from('game').insert({
       'roomID': roomCode,
@@ -41,7 +43,8 @@ class _LobbyPageState extends State<LobbyPage> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const DrawPage()));
+                                builder: (context) =>
+                                    ScoreboardPage(id: roomID)));
                       },
                       child: const Text('Create game')))),
           const Padding(

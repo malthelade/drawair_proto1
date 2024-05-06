@@ -2,28 +2,34 @@ import 'dart:math';
 
 import 'package:drawair_proto1/main.dart';
 import 'package:drawair_proto1/ui/scoreboard_page.dart';
+import 'package:drawair_proto1/ui/join_page.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
+
+var uuid = const Uuid();
 
 class LobbyPage extends StatefulWidget {
-  final int id;
+  final String playerID;
 
-  const LobbyPage({super.key, required this.id});
+  const LobbyPage({super.key, required this.playerID});
 
   @override
   State<LobbyPage> createState() => _LobbyPageState();
 }
 
 class _LobbyPageState extends State<LobbyPage> {
-  late int roomID;
+  late String roomID;
+  late int roomCode;
 
   createGame(playerID) async {
-    final int roomCode = Random().nextInt(899999) + 100000;
-    roomID = roomCode;
-    await supabase.from('room').insert({'id': roomCode});
+    final String id = uuid.v4();
+    roomID = id;
+    roomCode = Random().nextInt(899999) + 100000;
+    await supabase.from('room').insert({'id': id, 'code': roomCode});
     await supabase.from('game').insert({
-      'roomID': roomCode,
+      'roomID': id,
       'playerID': playerID,
-      'role': 'host',
+      'host': 'true',
       'drawing': 'true'
     });
   }
@@ -38,20 +44,28 @@ class _LobbyPageState extends State<LobbyPage> {
                   top: 150.0, left: 100.0, right: 100.0, bottom: 50.0),
               child: Center(
                   child: ElevatedButton(
+                      onPressed: () async {
+                        await createGame(widget.playerID);
+                        Navigator.push(
+                            // ignore: use_build_context_synchronously
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ScoreboardPage(
+                                    roomID: roomID, roomCode: roomCode)));
+                      },
+                      child: const Text('Create game')))),
+          Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50.0),
+              child: Center(
+                  child: ElevatedButton(
                       onPressed: () {
-                        createGame(widget.id);
                         Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) =>
-                                    ScoreboardPage(id: roomID)));
+                                    JoinPage(playerID: widget.playerID)));
                       },
-                      child: const Text('Create game')))),
-          const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 50.0),
-              child: Center(
-                  child: ElevatedButton(
-                      onPressed: null, child: Text('Join game')))),
+                      child: Text('Join game')))),
         ],
       ),
     );

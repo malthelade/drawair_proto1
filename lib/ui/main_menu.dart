@@ -1,8 +1,9 @@
-import 'dart:math';
-
 import 'package:drawair_proto1/main.dart';
 import 'package:drawair_proto1/ui/lobby_page.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
+
+var uuid = const Uuid();
 
 class MainMenu extends StatefulWidget {
   const MainMenu({super.key});
@@ -13,10 +14,10 @@ class MainMenu extends StatefulWidget {
 
 class _MainMenuState extends State<MainMenu> {
   final nameController = TextEditingController();
-  late int playerID;
+  late String playerID;
 
   createPlayer(newName) async {
-    playerID = Random().nextInt(899999) + 100000;
+    playerID = uuid.v4();
     await supabase.from('player').insert({'id': playerID, 'name': newName});
   }
 
@@ -45,7 +46,7 @@ class _MainMenuState extends State<MainMenu> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => LobbyPage(id: playerID)));
+                          builder: (context) => LobbyPage(playerID: playerID)));
                 },
               ),
             ],

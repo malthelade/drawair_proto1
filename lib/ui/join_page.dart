@@ -12,45 +12,73 @@ class JoinPage extends StatefulWidget {
 
 class _JoinPageState extends State<JoinPage> {
   final codeController = TextEditingController();
-  final rooms = supabase.from('room').select('code');
-  late bool roomExists;
+  final _future = supabase.from('room').select('*');
+  bool roomExists = false;
+  late String roomID;
 
-  joinGame(playerID, roomID) async {
+  joinGame(playerID, roomCode) async {
     await supabase.from('game').insert({
       'roomID': roomID,
       'playerID': playerID,
-      'host': 'true',
-      'drawing': 'true'
+      'host': 'false',
+      'drawing': 'false'
     });
+  }
+
+  doesRoomExist(rooms, roomCode) {
+    for (final room in rooms) {
+      if (room['code'] == roomCode) {
+        roomExists = true;
+        roomID = room['id'];
+        break;
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.only(
-              left: 30.0, right: 30.0, bottom: 30.0, top: 300.0),
-          child: Column(children: <Widget>[
-            TextField(
-              controller: codeController,
-              textAlign: TextAlign.center,
-              decoration: const InputDecoration(
-                  border: OutlineInputBorder(), hintText: 'Enter code'),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 30.0),
-              child: ElevatedButton(
-                  onPressed: null,
-                  // onPressed: () { roomExists = rooms['code'].contains(codeController.text);
-                  // if (){
-                  //   joinGame(widget.playerID, codeController.text);}
-                  // },
-                  child: const Text('Join')),
-            )
-          ]),
-        ),
-      ),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+          future: _future,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final rooms = snapshot.data!;
+            return Padding(
+              padding: const EdgeInsets.only(
+                  left: 30.0, right: 30.0, bottom: 30.0, top: 300.0),
+              child: Column(children: <Widget>[
+                TextField(
+                  controller: codeController,
+                  maxLength: 6,
+                  textAlign: TextAlign.center,
+                  decoration: const InputDecoration(
+                      border: OutlineInputBorder(), hintText: 'Enter code'),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 30.0),
+                  child: ElevatedButton(
+                      onPressed: () async {
+                        await doesRoomExist(
+                            rooms, int.parse(codeController.text));
+                        if (roomExists) {
+                          joinGame(widget.playerID, roomID);
+                        } else {
+                          showDialog(
+                              // ignore: use_build_context_synchronously
+                              context: context,
+                              builder: (context) => const AlertDialog(
+                                  title: Text('Rummet findes ikke'),
+                                  content: Text(
+                                      'Du har ikke skrevet en kode der passer til et rum')));
+                        }
+                      },
+                      child: const Text('Join')),
+                )
+              ]),
+            );
+          }),
     );
   }
 }

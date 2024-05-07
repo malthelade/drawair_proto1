@@ -1,4 +1,5 @@
 import 'package:drawair_proto1/main.dart';
+import 'package:drawair_proto1/ui/scoreboard_page.dart';
 import 'package:flutter/material.dart';
 
 class JoinPage extends StatefulWidget {
@@ -63,7 +64,16 @@ class _JoinPageState extends State<JoinPage> {
                         await doesRoomExist(
                             rooms, int.parse(codeController.text));
                         if (roomExists) {
-                          joinGame(widget.playerID, roomID);
+                          await joinGame(widget.playerID, roomID);
+                          Navigator.push(
+                              // ignore: use_build_context_synchronously
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ScoreboardPage(
+                                      playerID: widget.playerID,
+                                      roomID: roomID,
+                                      roomCode:
+                                          int.parse(codeController.text))));
                         } else {
                           showDialog(
                               // ignore: use_build_context_synchronously
@@ -71,7 +81,7 @@ class _JoinPageState extends State<JoinPage> {
                               builder: (context) => const AlertDialog(
                                   title: Text('Rummet findes ikke'),
                                   content: Text(
-                                      'Du har ikke skrevet en kode der passer til et rum')));
+                                      'Du har skrevet en kode, der ikke hører til et rum')));
                         }
                       },
                       child: const Text('Join')),

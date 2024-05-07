@@ -51,7 +51,9 @@ class _LobbyPageState extends State<LobbyPage> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) => ScoreboardPage(
-                                    roomID: roomID, roomCode: roomCode)));
+                                    playerID: widget.playerID,
+                                    roomID: roomID,
+                                    roomCode: roomCode)));
                       },
                       child: const Text('Create game')))),
           Padding(
@@ -65,7 +67,7 @@ class _LobbyPageState extends State<LobbyPage> {
                                 builder: (context) =>
                                     JoinPage(playerID: widget.playerID)));
                       },
-                      child: Text('Join game')))),
+                      child: const Text('Join game')))),
         ],
       ),
     );

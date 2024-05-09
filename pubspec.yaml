@@ -37,6 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   supabase_flutter: ^2.3.4
   uuid: ^4.4.0
+  rxdart: ^0.27.7
 
 dev_dependencies:
   flutter_test:

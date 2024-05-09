@@ -1,11 +1,13 @@
 import 'package:drawair_proto1/main.dart';
+import 'package:drawair_proto1/ui/score_page.dart';
 import 'package:drawair_proto1/ui/scoreboard_page.dart';
 import 'package:flutter/material.dart';
 
 class JoinPage extends StatefulWidget {
   final String playerID;
+  final String playerName;
 
-  const JoinPage({super.key, required this.playerID});
+  const JoinPage({super.key, required this.playerID, required this.playerName});
 
   @override
   State<JoinPage> createState() => _JoinPageState();
@@ -17,12 +19,13 @@ class _JoinPageState extends State<JoinPage> {
   bool roomExists = false;
   late String roomID;
 
-  joinGame(playerID, roomCode) async {
+  joinGame() async {
     await supabase.from('game').insert({
       'roomID': roomID,
-      'playerID': playerID,
+      'playerID': widget.playerID,
       'host': 'false',
-      'drawing': 'false'
+      'drawing': 'false',
+      'playerName': widget.playerName
     });
   }
 
@@ -64,12 +67,13 @@ class _JoinPageState extends State<JoinPage> {
                         await doesRoomExist(
                             rooms, int.parse(codeController.text));
                         if (roomExists) {
-                          await joinGame(widget.playerID, roomID);
+                          await joinGame();
                           Navigator.push(
                               // ignore: use_build_context_synchronously
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => ScoreboardPage(
+                                  builder: (context) => ScorePage(
+                                      playerName: widget.playerName,
                                       playerID: widget.playerID,
                                       roomID: roomID,
                                       roomCode:

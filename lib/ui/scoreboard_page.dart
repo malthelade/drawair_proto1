@@ -1,8 +1,6 @@
 import 'package:drawair_proto1/main.dart';
 import 'package:drawair_proto1/ui/lobby_page.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class ScoreboardPage extends StatefulWidget {
   final String playerID;
@@ -58,22 +56,22 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
                       ],
                     ),
                   ),
-                  Flexible(
-                    child: ElevatedButton(
-                        onPressed: () async {
-                          await supabase
-                              .from('game')
-                              .delete()
-                              .match({'playerID': widget.playerID});
-                          Navigator.push(
-                              // ignore: use_build_context_synchronously
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      LobbyPage(playerID: widget.playerID)));
-                        },
-                        child: const Text('Leave')),
-                  )
+                  // Flexible(
+                  //   child: ElevatedButton(
+                  //       onPressed: () async {
+                  //         await supabase
+                  //             .from('game')
+                  //             .delete()
+                  //             .match({'playerID': widget.playerID});
+                  //         Navigator.push(
+                  //             // ignore: use_build_context_synchronously
+                  //             context,
+                  //             MaterialPageRoute(
+                  //                 builder: (context) =>
+                  //                     LobbyPage(playerID: widget.playerID)));
+                  //       },
+                  //       child: const Text('Leave')),
+                  // )
                 ],
               );
             }));

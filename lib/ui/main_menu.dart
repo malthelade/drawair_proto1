@@ -41,12 +41,15 @@ class _MainMenuState extends State<MainMenu> {
                   )),
               ElevatedButton(
                 child: const Text('Continue'),
-                onPressed: () {
-                  createPlayer(nameController.text);
+                onPressed: () async {
+                  await createPlayer(nameController.text);
+                  if (!context.mounted) return;
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => LobbyPage(playerID: playerID)));
+                          builder: (context) => LobbyPage(
+                              playerID: playerID,
+                              playerName: nameController.text)));
                 },
               ),
             ],

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:drawair_proto1/main.dart';
+import 'package:drawair_proto1/ui/score_page.dart';
 import 'package:drawair_proto1/ui/scoreboard_page.dart';
 import 'package:drawair_proto1/ui/join_page.dart';
 import 'package:flutter/material.dart';
@@ -10,8 +11,10 @@ var uuid = const Uuid();
 
 class LobbyPage extends StatefulWidget {
   final String playerID;
+  final String playerName;
 
-  const LobbyPage({super.key, required this.playerID});
+  const LobbyPage(
+      {super.key, required this.playerID, required this.playerName});
 
   @override
   State<LobbyPage> createState() => _LobbyPageState();
@@ -21,16 +24,17 @@ class _LobbyPageState extends State<LobbyPage> {
   late String roomID;
   late int roomCode;
 
-  createGame(playerID) async {
+  createGame() async {
     final String id = uuid.v4();
     roomID = id;
     roomCode = Random().nextInt(899999) + 100000;
     await supabase.from('room').insert({'id': id, 'code': roomCode});
     await supabase.from('game').insert({
       'roomID': id,
-      'playerID': playerID,
+      'playerID': widget.playerID,
       'host': 'true',
-      'drawing': 'true'
+      'drawing': 'true',
+      'playerName': widget.playerName
     });
   }
 
@@ -45,12 +49,13 @@ class _LobbyPageState extends State<LobbyPage> {
               child: Center(
                   child: ElevatedButton(
                       onPressed: () async {
-                        await createGame(widget.playerID);
+                        await createGame();
                         Navigator.push(
                             // ignore: use_build_context_synchronously
                             context,
                             MaterialPageRoute(
-                                builder: (context) => ScoreboardPage(
+                                builder: (context) => ScorePage(
+                                    playerName: widget.playerName,
                                     playerID: widget.playerID,
                                     roomID: roomID,
                                     roomCode: roomCode)));
@@ -64,8 +69,9 @@ class _LobbyPageState extends State<LobbyPage> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    JoinPage(playerID: widget.playerID)));
+                                builder: (context) => JoinPage(
+                                    playerID: widget.playerID,
+                                    playerName: widget.playerName)));
                       },
                       child: const Text('Join game')))),
         ],

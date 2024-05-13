@@ -1,6 +1,5 @@
 import 'package:drawair_proto1/main.dart';
 import 'package:drawair_proto1/ui/score_page.dart';
-import 'package:drawair_proto1/ui/scoreboard_page.dart';
 import 'package:flutter/material.dart';
 
 class JoinPage extends StatefulWidget {

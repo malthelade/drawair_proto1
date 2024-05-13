@@ -1,7 +1,7 @@
 import 'package:drawair_proto1/main.dart';
 import 'package:drawair_proto1/ui/lobby_page.dart';
+import 'package:drawair_proto1/ui/pre_draw_page.dart';
 import 'package:flutter/material.dart';
-import 'package:rxdart/rxdart.dart';
 
 class ScorePage extends StatefulWidget {
   final String playerName;
@@ -23,10 +23,6 @@ class ScorePage extends StatefulWidget {
 class _ScorePageState extends State<ScorePage> {
   @override
   Widget build(BuildContext context) {
-    // select * from high_score where "roomID" = '28961025-ee38-4172-a4ce-53c187b44c42'
-    // final gameStream = supabase
-    //     .from('high_score')
-    //     .stream(primaryKey: ['id']).eq('roomID', widget.roomID);
     final gameStream = supabase
         .from('game')
         .stream(primaryKey: ['id']).eq('roomID', widget.roomID);
@@ -40,6 +36,30 @@ class _ScorePageState extends State<ScorePage> {
             );
           }
           final list = snapshot.data!;
+
+          startRecieved(payload) {
+            for (var player in list) {
+              if (player['playerID'] == widget.playerID) {
+                if (player['drawing']) {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: ((context) => PreDrawPage(
+                              playerName: widget.playerName,
+                              playerID: widget.playerID,
+                              roomID: widget.roomID,
+                              roomCode: widget.roomCode))));
+                }
+              }
+            }
+          }
+
+          final channelRoom = supabase.channel(widget.roomID);
+          channelRoom
+              .onBroadcast(
+                  event: 'start', callback: (payload) => startRecieved(payload))
+              .subscribe();
+
           return Scaffold(
               body: Column(
             children: <Widget>[
@@ -63,6 +83,14 @@ class _ScorePageState extends State<ScorePage> {
                   ],
                 ),
               ),
+              Flexible(
+                  child: ElevatedButton(
+                onPressed: () {
+                  channelRoom.sendBroadcastMessage(
+                      event: 'start', payload: {'message': 'game started'});
+                },
+                child: const Text('Start'),
+              )),
               Flexible(
                 child: ElevatedButton(
                     onPressed: () async {

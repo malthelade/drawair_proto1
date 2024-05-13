@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:drawair_proto1/main.dart';
 import 'package:drawair_proto1/ui/score_page.dart';
-import 'package:drawair_proto1/ui/scoreboard_page.dart';
 import 'package:drawair_proto1/ui/join_page.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -36,6 +35,8 @@ class _LobbyPageState extends State<LobbyPage> {
       'drawing': 'true',
       'playerName': widget.playerName
     });
+    await supabase.from('current_prompt').insert({'roomID': roomID});
+    supabase.channel(id);
   }
 
   @override

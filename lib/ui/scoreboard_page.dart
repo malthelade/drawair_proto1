@@ -1,5 +1,4 @@
 import 'package:drawair_proto1/main.dart';
-import 'package:drawair_proto1/ui/lobby_page.dart';
 import 'package:flutter/material.dart';
 
 class ScoreboardPage extends StatefulWidget {

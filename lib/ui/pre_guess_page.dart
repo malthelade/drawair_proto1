@@ -8,13 +8,15 @@ class PreGuessPage extends StatefulWidget {
   final String playerID;
   final String roomID;
   final int roomCode;
+  final int playerCount;
 
   const PreGuessPage(
       {super.key,
       required this.playerName,
       required this.playerID,
       required this.roomID,
-      required this.roomCode});
+      required this.roomCode,
+      required this.playerCount});
 
   @override
   State<PreGuessPage> createState() => _PreGuessPageState();
@@ -26,7 +28,8 @@ class _PreGuessPageState extends State<PreGuessPage> {
   @override
   void initState() {
     super.initState();
-    _channelRoom = supabase.channel(widget.roomID);
+    _channelRoom = supabase.channel(widget.roomID,
+        opts: const RealtimeChannelConfig(self: true));
     _channelRoom
         .onBroadcast(
             event: 'start_round', callback: (payload) => startRoundRecieved())
@@ -34,6 +37,8 @@ class _PreGuessPageState extends State<PreGuessPage> {
   }
 
   startRoundRecieved() {
+    print('start recieved');
+    if (!mounted) return;
     Navigator.push(
         context,
         MaterialPageRoute(
@@ -41,7 +46,8 @@ class _PreGuessPageState extends State<PreGuessPage> {
                 playerName: widget.playerName,
                 playerID: widget.playerID,
                 roomID: widget.roomID,
-                roomCode: widget.roomCode))));
+                roomCode: widget.roomCode,
+                playerCount: widget.playerCount))));
   }
 
   @override

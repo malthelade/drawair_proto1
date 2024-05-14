@@ -51,8 +51,8 @@ class _LobbyPageState extends State<LobbyPage> {
                   child: ElevatedButton(
                       onPressed: () async {
                         await createGame();
+                        if (!context.mounted) return;
                         Navigator.push(
-                            // ignore: use_build_context_synchronously
                             context,
                             MaterialPageRoute(
                                 builder: (context) => ScorePage(

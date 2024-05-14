@@ -8,13 +8,15 @@ class PreDrawPage extends StatefulWidget {
   final String playerID;
   final String roomID;
   final int roomCode;
+  final int playerCount;
 
   const PreDrawPage(
       {super.key,
       required this.playerName,
       required this.playerID,
       required this.roomID,
-      required this.roomCode});
+      required this.roomCode,
+      required this.playerCount});
 
   @override
   State<PreDrawPage> createState() => _PreDrawPageState();
@@ -29,12 +31,26 @@ class _PreDrawPageState extends State<PreDrawPage> {
     super.initState();
     _channelRoom = supabase.channel(widget.roomID,
         opts: const RealtimeChannelConfig(self: true));
+    _channelRoom
+        .onBroadcast(event: 'start_round', callback: (payload) => something())
+        .subscribe();
+  }
+
+// må ikke fjernes, lortet går i stykker hvis man gør
+  something() {
+    print('something');
   }
 
   pushPrompt(promptID) async {
     await supabase
         .from('current_prompt')
         .update({'promptID': promptID}).match({'roomID': widget.roomID});
+  }
+
+  startRound() async {
+    await _channelRoom.sendBroadcastMessage(
+        event: 'start_round', payload: {'message': 'something'});
+    print('round_started');
   }
 
   @override
@@ -57,10 +73,9 @@ class _PreDrawPageState extends State<PreDrawPage> {
                 children: <Widget>[
                   Text(prompt['draw_prompt']),
                   ElevatedButton(
-                      onPressed: () {
-                        _channelRoom.sendBroadcastMessage(
-                            event: 'start_round',
-                            payload: {'message': 'round started'});
+                      onPressed: () async {
+                        await startRound();
+                        if (!context.mounted) return;
                         Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -68,7 +83,8 @@ class _PreDrawPageState extends State<PreDrawPage> {
                                     playerName: widget.playerName,
                                     playerID: widget.playerID,
                                     roomID: widget.roomID,
-                                    roomCode: widget.roomCode)));
+                                    roomCode: widget.roomCode,
+                                    playerCount: widget.playerCount)));
                       },
                       child: const Text('Start')),
                 ],

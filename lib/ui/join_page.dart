@@ -67,8 +67,8 @@ class _JoinPageState extends State<JoinPage> {
                             rooms, int.parse(codeController.text));
                         if (roomExists) {
                           await joinGame();
+                          if (!context.mounted) return;
                           Navigator.push(
-                              // ignore: use_build_context_synchronously
                               context,
                               MaterialPageRoute(
                                   builder: (context) => ScorePage(
@@ -78,8 +78,8 @@ class _JoinPageState extends State<JoinPage> {
                                       roomCode:
                                           int.parse(codeController.text))));
                         } else {
+                          if (!context.mounted) return;
                           showDialog(
-                              // ignore: use_build_context_synchronously
                               context: context,
                               builder: (context) => const AlertDialog(
                                   title: Text('Rummet findes ikke'),

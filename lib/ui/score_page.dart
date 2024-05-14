@@ -25,6 +25,7 @@ class ScorePage extends StatefulWidget {
 class _ScorePageState extends State<ScorePage> {
   late final RealtimeChannel _channelRoom;
   late List<Map<String, dynamic>> _gameList;
+  int drawerIndex = 0;
 
   @override
   void initState() {
@@ -37,10 +38,12 @@ class _ScorePageState extends State<ScorePage> {
         .subscribe();
   }
 
-  startGameRecieved() {
+  startGameRecieved() async {
     for (var player in _gameList) {
       if (player['playerID'] == widget.playerID) {
         if (player['drawing']) {
+          await chooseNextDrawer();
+          if (!mounted) return;
           Navigator.push(
               context,
               MaterialPageRoute(
@@ -48,7 +51,8 @@ class _ScorePageState extends State<ScorePage> {
                       playerName: widget.playerName,
                       playerID: widget.playerID,
                       roomID: widget.roomID,
-                      roomCode: widget.roomCode))));
+                      roomCode: widget.roomCode,
+                      playerCount: _gameList.length))));
         } else {
           Navigator.push(
               context,
@@ -57,10 +61,23 @@ class _ScorePageState extends State<ScorePage> {
                       playerName: widget.playerName,
                       playerID: widget.playerID,
                       roomID: widget.roomID,
-                      roomCode: widget.roomCode))));
+                      roomCode: widget.roomCode,
+                      playerCount: _gameList.length))));
         }
       }
     }
+  }
+
+  chooseNextDrawer() async {
+    await supabase.from('game').update({'drawing': 'false'}).match(
+        {'playerID': _gameList[drawerIndex]['playerID']});
+    if (drawerIndex >= _gameList.length - 1) {
+      drawerIndex = 0;
+    } else {
+      drawerIndex += 1;
+    }
+    await supabase.from('game').update({'drawing': 'true'}).match(
+        {'playerID': _gameList[drawerIndex]['playerID']});
   }
 
   @override

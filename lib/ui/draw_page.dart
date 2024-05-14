@@ -23,6 +23,16 @@ class DrawPage extends StatefulWidget {
 class _DrawPageState extends State<DrawPage> {
   int remainingTime = 60;
 
+  @override
+  void initState() {
+    super.initState();
+    Timer(const Duration(seconds: 60), handleTimeout);
+    Timer.periodic(const Duration(seconds: 1), (timer) {
+      remainingTime -= 1;
+      setState(() {});
+    });
+  }
+
   handleTimeout() {
     //Broadcast runde færdig
     Navigator.push(
@@ -37,10 +47,6 @@ class _DrawPageState extends State<DrawPage> {
 
   @override
   Widget build(BuildContext context) {
-    Timer(const Duration(seconds: 60), handleTimeout);
-    Timer.periodic(const Duration(seconds: 1), (timer) {
-      remainingTime -= 1;
-    });
     return Scaffold(
       body: Center(
           child: Column(

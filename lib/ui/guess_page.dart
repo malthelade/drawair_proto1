@@ -1,8 +1,21 @@
+import 'dart:async';
+
 import 'package:drawair_proto1/main.dart';
+import 'package:drawair_proto1/ui/score_page.dart';
 import 'package:flutter/material.dart';
 
 class GuessPage extends StatefulWidget {
-  const GuessPage({super.key});
+  final String playerName;
+  final String playerID;
+  final String roomID;
+  final int roomCode;
+
+  const GuessPage(
+      {super.key,
+      required this.playerName,
+      required this.playerID,
+      required this.roomID,
+      required this.roomCode});
 
   @override
   State<GuessPage> createState() => _GuessPageState();
@@ -13,6 +26,17 @@ class _GuessPageState extends State<GuessPage> {
       supabase.from('prompt').select('answer, chosen_prompt!inner(*)');
 
   final answerController = TextEditingController();
+
+  handleTimeout() {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ScorePage(
+                playerName: widget.playerName,
+                playerID: widget.playerID,
+                roomID: widget.roomID,
+                roomCode: widget.roomCode)));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +67,8 @@ class _GuessPageState extends State<GuessPage> {
                             builder: (context) => const AlertDialog(
                                 title: Text('Rigtigt'),
                                 content: Text('Du svarede rigtigt')));
+                        //Broadcast rigtigt svar
+                        Timer(const Duration(seconds: 3), handleTimeout);
                       } else {
                         showDialog(
                             context: context,

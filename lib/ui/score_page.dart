@@ -1,7 +1,9 @@
 import 'package:drawair_proto1/main.dart';
 import 'package:drawair_proto1/ui/lobby_page.dart';
 import 'package:drawair_proto1/ui/pre_draw_page.dart';
+import 'package:drawair_proto1/ui/pre_guess_page.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ScorePage extends StatefulWidget {
   final String playerName;
@@ -21,6 +23,46 @@ class ScorePage extends StatefulWidget {
 }
 
 class _ScorePageState extends State<ScorePage> {
+  late final RealtimeChannel _channelRoom;
+  late List<Map<String, dynamic>> _gameList;
+
+  @override
+  void initState() {
+    super.initState();
+    _channelRoom = supabase.channel(widget.roomID,
+        opts: const RealtimeChannelConfig(self: true));
+    _channelRoom
+        .onBroadcast(
+            event: 'start_game', callback: (payload) => startGameRecieved())
+        .subscribe();
+  }
+
+  startGameRecieved() {
+    for (var player in _gameList) {
+      if (player['playerID'] == widget.playerID) {
+        if (player['drawing']) {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: ((context) => PreDrawPage(
+                      playerName: widget.playerName,
+                      playerID: widget.playerID,
+                      roomID: widget.roomID,
+                      roomCode: widget.roomCode))));
+        } else {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: ((context) => PreGuessPage(
+                      playerName: widget.playerName,
+                      playerID: widget.playerID,
+                      roomID: widget.roomID,
+                      roomCode: widget.roomCode))));
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final gameStream = supabase
@@ -35,30 +77,7 @@ class _ScorePageState extends State<ScorePage> {
               child: CircularProgressIndicator(),
             );
           }
-          final list = snapshot.data!;
-
-          startRecieved(payload) {
-            for (var player in list) {
-              if (player['playerID'] == widget.playerID) {
-                if (player['drawing']) {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: ((context) => PreDrawPage(
-                              playerName: widget.playerName,
-                              playerID: widget.playerID,
-                              roomID: widget.roomID,
-                              roomCode: widget.roomCode))));
-                }
-              }
-            }
-          }
-
-          final channelRoom = supabase.channel(widget.roomID);
-          channelRoom
-              .onBroadcast(
-                  event: 'start', callback: (payload) => startRecieved(payload))
-              .subscribe();
+          _gameList = snapshot.data!;
 
           return Scaffold(
               body: Column(
@@ -71,7 +90,7 @@ class _ScorePageState extends State<ScorePage> {
                     ListTile(
                       title: Text('Code: ${widget.roomCode}'),
                     ),
-                    for (var player in list)
+                    for (var player in _gameList)
                       ListTile(
                         title: Text(
                             '${player['playerName']}: ${player['points']}'),
@@ -86,8 +105,9 @@ class _ScorePageState extends State<ScorePage> {
               Flexible(
                   child: ElevatedButton(
                 onPressed: () {
-                  channelRoom.sendBroadcastMessage(
-                      event: 'start', payload: {'message': 'game started'});
+                  _channelRoom.sendBroadcastMessage(
+                      event: 'start_game',
+                      payload: {'message': 'game started'});
                 },
                 child: const Text('Start'),
               )),

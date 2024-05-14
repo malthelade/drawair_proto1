@@ -1,6 +1,7 @@
 import 'package:drawair_proto1/main.dart';
 import 'package:drawair_proto1/ui/draw_page.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PreDrawPage extends StatefulWidget {
   final String playerName;
@@ -21,6 +22,14 @@ class PreDrawPage extends StatefulWidget {
 
 class _PreDrawPageState extends State<PreDrawPage> {
   final _future = supabase.from('prompt').select();
+  late final RealtimeChannel _channelRoom;
+
+  @override
+  void initState() {
+    super.initState();
+    _channelRoom = supabase.channel(widget.roomID,
+        opts: const RealtimeChannelConfig(self: true));
+  }
 
   pushPrompt(promptID) async {
     await supabase
@@ -49,7 +58,9 @@ class _PreDrawPageState extends State<PreDrawPage> {
                   Text(prompt['draw_prompt']),
                   ElevatedButton(
                       onPressed: () {
-                        // Broadcast at du starter
+                        _channelRoom.sendBroadcastMessage(
+                            event: 'start_round',
+                            payload: {'message': 'round started'});
                         Navigator.push(
                             context,
                             MaterialPageRoute(

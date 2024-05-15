@@ -25,7 +25,7 @@ class ScorePage extends StatefulWidget {
 class _ScorePageState extends State<ScorePage> {
   late final RealtimeChannel _channelRoom;
   late List<Map<String, dynamic>> _gameList;
-  int drawerIndex = 0;
+  late String _currentDrawer;
 
   @override
   void initState() {
@@ -38,53 +38,62 @@ class _ScorePageState extends State<ScorePage> {
         .subscribe();
   }
 
+  getCurrentDrawer() async {
+    final drawerPull = await supabase
+        .from('current_prompt')
+        .select('playerID')
+        .eq('roomID', widget.roomID);
+    _currentDrawer = drawerPull[0]['playerID'];
+  }
+
   startGameRecieved() async {
-    for (var player in _gameList) {
-      if (player['playerID'] == widget.playerID) {
-        if (player['drawing']) {
-          await chooseNextDrawer();
-          if (!mounted) return;
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: ((context) => PreDrawPage(
-                      playerName: widget.playerName,
-                      playerID: widget.playerID,
-                      roomID: widget.roomID,
-                      roomCode: widget.roomCode,
-                      playerCount: _gameList.length))));
-        } else {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: ((context) => PreGuessPage(
-                      playerName: widget.playerName,
-                      playerID: widget.playerID,
-                      roomID: widget.roomID,
-                      roomCode: widget.roomCode,
-                      playerCount: _gameList.length))));
-        }
-      }
+    if (_currentDrawer == widget.playerID) {
+      await chooseNextDrawer();
+      if (!mounted) return;
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: ((context) => PreDrawPage(
+                  playerName: widget.playerName,
+                  playerID: widget.playerID,
+                  roomID: widget.roomID,
+                  roomCode: widget.roomCode,
+                  playerCount: _gameList.length))));
+    } else {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: ((context) => PreGuessPage(
+                  playerName: widget.playerName,
+                  playerID: widget.playerID,
+                  roomID: widget.roomID,
+                  roomCode: widget.roomCode,
+                  playerCount: _gameList.length))));
     }
   }
 
   chooseNextDrawer() async {
-    await supabase.from('game').update({'drawing': 'false'}).match(
-        {'playerID': _gameList[drawerIndex]['playerID']});
-    if (drawerIndex >= _gameList.length - 1) {
-      drawerIndex = 0;
-    } else {
-      drawerIndex += 1;
+    final playerList = [];
+    for (var player in _gameList) {
+      playerList.add(player['playerID']);
     }
-    await supabase.from('game').update({'drawing': 'true'}).match(
-        {'playerID': _gameList[drawerIndex]['playerID']});
+    int nextDrawerIndex = playerList.indexOf(_currentDrawer) + 1;
+    if (nextDrawerIndex > playerList.length - 1) {
+      nextDrawerIndex = 0;
+    }
+    await supabase
+        .from('current_prompt')
+        .update({'playerID': playerList[nextDrawerIndex]}).match(
+            {'roomID': widget.roomID});
   }
 
   @override
   Widget build(BuildContext context) {
     final gameStream = supabase
         .from('game')
-        .stream(primaryKey: ['id']).eq('roomID', widget.roomID);
+        .stream(primaryKey: ['id'])
+        .eq('roomID', widget.roomID)
+        .order('id', ascending: true);
 
     return StreamBuilder<List<Map<String, dynamic>>>(
         stream: gameStream,
@@ -95,7 +104,7 @@ class _ScorePageState extends State<ScorePage> {
             );
           }
           _gameList = snapshot.data!;
-
+          getCurrentDrawer();
           return Scaffold(
               body: Column(
             children: <Widget>[

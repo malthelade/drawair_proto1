@@ -95,7 +95,6 @@ class _GuessPageState extends State<GuessPage> {
             child: Center(
               child: Column(
                 children: <Widget>[
-                  Text(answer),
                   TextField(
                     controller: answerController,
                   ),

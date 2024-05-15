@@ -23,7 +23,6 @@ class _JoinPageState extends State<JoinPage> {
       'roomID': roomID,
       'playerID': widget.playerID,
       'host': 'false',
-      'drawing': 'false',
       'playerName': widget.playerName
     });
   }

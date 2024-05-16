@@ -47,7 +47,7 @@ class _PreDrawPageState extends State<PreDrawPage> {
 
   startRound() async {
     await _channelRoom.sendBroadcastMessage(
-        event: 'start_round', payload: {'message': 'something'});
+        event: 'start_round', payload: {'message': 'round started'});
   }
 
   @override
@@ -68,7 +68,7 @@ class _PreDrawPageState extends State<PreDrawPage> {
             child: Center(
               child: Column(
                 children: <Widget>[
-                  Text(prompt['draw_prompt']),
+                  Text("Tegn $prompt['draw_prompt']"),
                   ElevatedButton(
                       onPressed: () async {
                         await startRound();

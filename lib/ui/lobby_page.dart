@@ -61,7 +61,7 @@ class _LobbyPageState extends State<LobbyPage> {
                                     roomID: roomID,
                                     roomCode: roomCode)));
                       },
-                      child: const Text('Create game')))),
+                      child: const Text('Opret spil')))),
           Padding(
               padding: const EdgeInsets.symmetric(horizontal: 50.0),
               child: Center(
@@ -74,7 +74,7 @@ class _LobbyPageState extends State<LobbyPage> {
                                     playerID: widget.playerID,
                                     playerName: widget.playerName)));
                       },
-                      child: const Text('Join game')))),
+                      child: const Text('Tilslut spil')))),
         ],
       ),
     );

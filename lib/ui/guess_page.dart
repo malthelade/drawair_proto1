@@ -122,7 +122,7 @@ class _GuessPageState extends State<GuessPage> {
                                 content: Text('Du svarede forkert')));
                       }
                     },
-                    child: const Text('Svar'),
+                    child: const Text('Gæt'),
                   ),
                 ],
               ),

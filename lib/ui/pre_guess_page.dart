@@ -55,7 +55,7 @@ class _PreGuessPageState extends State<PreGuessPage> {
       body: Center(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 200.0),
-          child: Text('Get ready!'),
+          child: Text('Vær klar!'),
         ),
       ),
     );

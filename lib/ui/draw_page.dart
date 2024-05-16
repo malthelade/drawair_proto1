@@ -83,7 +83,7 @@ class _DrawPageState extends State<DrawPage> {
         children: <Widget>[
           const Padding(
             padding: EdgeInsets.only(top: 100.0),
-            child: Text('Time left:'),
+            child: Text('Tid tilbage:'),
           ),
           Text(remainingTime.toString())
         ],

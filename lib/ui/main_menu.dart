@@ -37,10 +37,10 @@ class _MainMenuState extends State<MainMenu> {
                     textAlign: TextAlign.center,
                     decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        hintText: 'Enter player name'),
+                        hintText: 'Skriv spiller navn'),
                   )),
               ElevatedButton(
-                child: const Text('Continue'),
+                child: const Text('Gå videre'),
                 onPressed: () async {
                   await createPlayer(nameController.text);
                   if (!context.mounted) return;

@@ -55,7 +55,7 @@ class _JoinPageState extends State<JoinPage> {
                   maxLength: 6,
                   textAlign: TextAlign.center,
                   decoration: const InputDecoration(
-                      border: OutlineInputBorder(), hintText: 'Enter code'),
+                      border: OutlineInputBorder(), hintText: 'Skriv kode'),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 30.0),
@@ -85,7 +85,7 @@ class _JoinPageState extends State<JoinPage> {
                                       'Du har skrevet en kode, der ikke hører til et rum')));
                         }
                       },
-                      child: const Text('Join')),
+                      child: const Text('Tilslut')),
                 )
               ]),
             );

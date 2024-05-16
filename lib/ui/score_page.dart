@@ -114,7 +114,7 @@ class _ScorePageState extends State<ScorePage> {
                   padding: const EdgeInsets.all(40.0),
                   children: [
                     ListTile(
-                      title: Text('Code: ${widget.roomCode}'),
+                      title: Text('Kode: ${widget.roomCode}'),
                     ),
                     for (var player in _gameList)
                       ListTile(
@@ -153,7 +153,7 @@ class _ScorePageState extends State<ScorePage> {
                                     playerName: widget.playerName,
                                   )));
                     },
-                    child: const Text('Leave')),
+                    child: const Text('Gå ud')),
               )
             ],
           ));

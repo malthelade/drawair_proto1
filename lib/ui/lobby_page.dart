@@ -31,7 +31,6 @@ class _LobbyPageState extends State<LobbyPage> {
     await supabase.from('game').insert({
       'roomID': id,
       'playerID': widget.playerID,
-      'host': 'true',
       'playerName': widget.playerName
     });
     await supabase

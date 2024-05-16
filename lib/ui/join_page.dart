@@ -22,7 +22,6 @@ class _JoinPageState extends State<JoinPage> {
     await supabase.from('game').insert({
       'roomID': roomID,
       'playerID': widget.playerID,
-      'host': 'false',
       'playerName': widget.playerName
     });
   }

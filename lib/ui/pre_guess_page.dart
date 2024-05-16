@@ -37,7 +37,6 @@ class _PreGuessPageState extends State<PreGuessPage> {
   }
 
   startRoundRecieved() {
-    print('start recieved');
     if (!mounted) return;
     Navigator.push(
         context,

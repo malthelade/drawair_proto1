@@ -37,9 +37,7 @@ class _PreDrawPageState extends State<PreDrawPage> {
   }
 
 // må ikke fjernes, lortet går i stykker hvis man gør
-  something() {
-    print('something');
-  }
+  something() {}
 
   pushPrompt(promptID) async {
     await supabase
@@ -50,7 +48,6 @@ class _PreDrawPageState extends State<PreDrawPage> {
   startRound() async {
     await _channelRoom.sendBroadcastMessage(
         event: 'start_round', payload: {'message': 'something'});
-    print('round_started');
   }
 
   @override

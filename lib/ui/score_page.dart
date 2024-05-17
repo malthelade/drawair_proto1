@@ -85,6 +85,15 @@ class _ScorePageState extends State<ScorePage> {
             {'roomID': widget.roomID});
   }
 
+  choosePrompt() async {
+    final promptsList = await supabase.from('prompt').select();
+    promptsList.shuffle();
+    final prompt = promptsList.removeLast();
+    await supabase
+        .from('current_prompt')
+        .update({'promptID': prompt['id']}).match({'roomID': widget.roomID});
+  }
+
   @override
   Widget build(BuildContext context) {
     final gameStream = supabase
@@ -128,7 +137,8 @@ class _ScorePageState extends State<ScorePage> {
               ),
               Flexible(
                   child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  await choosePrompt();
                   _channelRoom.sendBroadcastMessage(
                       event: 'start_game',
                       payload: {'message': 'game started'});

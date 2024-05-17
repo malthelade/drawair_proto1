@@ -23,7 +23,6 @@ class PreDrawPage extends StatefulWidget {
 }
 
 class _PreDrawPageState extends State<PreDrawPage> {
-  final _future = supabase.from('prompt').select();
   late final RealtimeChannel _channelRoom;
 
   @override
@@ -39,12 +38,6 @@ class _PreDrawPageState extends State<PreDrawPage> {
 // må ikke fjernes, lortet går i stykker hvis man gør
   something() {}
 
-  pushPrompt(promptID) async {
-    await supabase
-        .from('current_prompt')
-        .update({'promptID': promptID}).match({'roomID': widget.roomID});
-  }
-
   startRound() async {
     await _channelRoom.sendBroadcastMessage(
         event: 'start_round', payload: {'message': 'round started'});
@@ -52,23 +45,25 @@ class _PreDrawPageState extends State<PreDrawPage> {
 
   @override
   Widget build(BuildContext context) {
+    final future = supabase
+        .from('prompt')
+        .select('*, current_prompt!inner(*)')
+        .eq('current_prompt.roomID', widget.roomID);
     return Scaffold(
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _future,
+        future: future,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
-          final prompts = snapshot.data!;
-          prompts.shuffle();
-          final prompt = prompts.removeLast();
-          pushPrompt(prompt['id']);
+          final prompt = snapshot.data!;
+          final drawPrompt = prompt[0]['draw_prompt'];
           return Padding(
             padding: const EdgeInsets.all(100.0),
             child: Center(
               child: Column(
                 children: <Widget>[
-                  Text("Tegn $prompt['draw_prompt']"),
+                  Text("Tegn $drawPrompt"),
                   ElevatedButton(
                       onPressed: () async {
                         await startRound();

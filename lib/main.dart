@@ -1,8 +1,6 @@
 import 'package:drawair_proto1/supabase/auth.dart';
 import 'package:flutter/material.dart';
-
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import 'ui/main_menu.dart';
 
 final supabase = Supabase.instance.client;

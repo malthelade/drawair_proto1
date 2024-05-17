@@ -77,10 +77,8 @@ class _ScorePageState extends State<ScorePage> {
     for (var player in _gameList) {
       playerList.add(player['playerID']);
     }
-    int nextDrawerIndex = playerList.indexOf(_currentDrawer) + 1;
-    if (nextDrawerIndex > playerList.length - 1) {
-      nextDrawerIndex = 0;
-    }
+    int nextDrawerIndex =
+        (playerList.indexOf(_currentDrawer) + 1) % playerList.length;
     await supabase
         .from('current_prompt')
         .update({'playerID': playerList[nextDrawerIndex]}).match(

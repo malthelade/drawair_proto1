@@ -30,12 +30,13 @@ class _PreDrawPageState extends State<PreDrawPage> {
     super.initState();
     _channelRoom = supabase.channel(widget.roomID,
         opts: const RealtimeChannelConfig(self: true));
+    //pre_guess_page modtager ikke signalet hvis den her ikke selv subscriber
     _channelRoom
         .onBroadcast(event: 'start_round', callback: (payload) => something())
         .subscribe();
   }
 
-// må ikke fjernes, lortet går i stykker hvis man gør
+// Den skal have en callback, så lad den være
   something() {}
 
   startRound() async {

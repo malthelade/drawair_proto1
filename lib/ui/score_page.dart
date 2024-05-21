@@ -152,8 +152,8 @@ class _ScorePageState extends State<ScorePage> {
                           .from('game')
                           .delete()
                           .match({'playerID': widget.playerID});
+                      if (!context.mounted) return;
                       Navigator.push(
-                          // ignore: use_build_context_synchronously
                           context,
                           MaterialPageRoute(
                               builder: (context) => LobbyPage(

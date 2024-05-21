@@ -36,7 +36,6 @@ class _LobbyPageState extends State<LobbyPage> {
     await supabase
         .from('current_prompt')
         .insert({'roomID': roomID, 'playerID': widget.playerID});
-    supabase.channel(id);
   }
 
   @override

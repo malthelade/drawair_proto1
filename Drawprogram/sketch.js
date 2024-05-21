@@ -1,23 +1,24 @@
 let video;
 let poseNet;
 let pose;
-let drawings = []
-let currentdrawings = []
+let drawings = [];
+let currentdrawings = [];
 let estimationWindowWidth = 5;
-let x_estimation = []
-let y_estimation = []
+let x_estimation = [];
+let y_estimation = [];
 let current_point;
 let smoothed_point;
 let debug = false;
 let estimationSlider;
+let left_hand_mode = false;
 
 
 function setup() {
   current_point = createVector(0, 0);
   smoothed_point = createVector(0, 0);
-  createCanvas(900, 630)
+  createCanvas(900, 630);
   video = createCapture(VIDEO);
-  video.size(900, 600);
+  video.size(900, 630);
   video.hide();
   poseNet = ml5.poseNet(video, modelLoaded);
   poseNet.on('pose', gotposes);
@@ -36,11 +37,16 @@ function gotposes(poses) {
     pose = poses[0].pose;
   }
   if (!pose) {
-    console.log('pose empty')
+    console.log('pose empty');
     return
   }
-
-  current_point = pose.rightWrist;
+  if (left_hand_mode == true){
+    current_point = pose.leftWrist;
+  }
+  else{
+    current_point = pose.rightWrist;
+  }
+  
 
   if (mouseIsPressed == true && mouseButton === LEFT) {
     if (current_point) {
@@ -100,7 +106,7 @@ function draw() {
     estimationWindowWidth = estimationSlider.value();
     estimationSlider.show();
   } else {
-    estimationWindowWidth = 5
+    estimationWindowWidth = 5;
     estimationSlider.hide();
   }
   //debug mode code
@@ -125,16 +131,16 @@ function mouseReleased() {
     currentdrawings = [];
   }
 }
-// activate debug mode
+// activate debug mode and left hand mode
 function keyPressed() {
   if (key == "d") {
-    if (debug == false) {
-      debug = true
-    }
-    else {
-      (debug = false);
-    }
+    debug = !debug;
+
   }
+  if (key == "l"){
+    left_hand_mode = !left_hand_mode;
+  }
+  
 }
 
 
